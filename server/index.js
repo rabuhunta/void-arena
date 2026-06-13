@@ -31,14 +31,14 @@ function makeCode() {
 function publicRoomState(room) {
   const p = t => room.players[t] ? {
     name: room.players[t].name, team: t,
-    ready: room.players[t].ready, orderSet: !!room.players[t].order,
+    ready: room.players[t].ready, heroId: room.players[t].heroId || null,
     connected: room.players[t].connected,
   } : null;
   return {
     code: room.code,
     phase: room.match ? 'battle' : 'lobby',
     A: p('A'), B: p('B'),
-    teams: { A: TEAMS.A, B: TEAMS.B },
+    roster: Object.keys(CHARACTERS),
     mapId: room.mapId || 'void',
     host: room.host || 'A',
   };
@@ -69,8 +69,8 @@ function broadcastRoom(room) {
 
 function startMatch(room) {
   const orders = {
-    A: room.players.A.order.map(i => TEAMS.A.roster[i]),
-    B: room.players.B.order.map(i => TEAMS.B.roster[i]),
+    A: [room.players.A.heroId, room.players.A.heroId, room.players.A.heroId],
+    B: [room.players.B.heroId, room.players.B.heroId, room.players.B.heroId],
   };
   const map = MAPS[room.mapId] || MAPS.void;
   room.match = new Match(orders, () => {}, map.obstacles);
@@ -137,11 +137,11 @@ io.on('connection', socket => {
 
   socket.on('create', (data, cb) => {
     const name = String(data?.name || 'Игрок').slice(0, 16);
-    const team = data?.team === 'B' ? 'B' : 'A';
+    const team = 'A';
     const code = makeCode();
     const token = crypto.randomBytes(12).toString('hex');
     const room = { code, players: { A: null, B: null }, match: null, loops: null, mapId: 'void', host: team };
-    room.players[team] = { token, name, socketId: socket.id, order: null, ready: false, connected: true, graceTimer: null };
+    room.players[team] = { token, name, socketId: socket.id, heroId: null, ready: false, connected: true, graceTimer: null };
     rooms.set(code, room);
     bind(room, team);
     cb?.({ ok: true, code, token, team });
@@ -156,7 +156,7 @@ io.on('connection', socket => {
     const freeTeam = !room.players.A ? 'A' : !room.players.B ? 'B' : null;
     if (!freeTeam) return cb?.({ ok: false, err: 'Комната уже заполнена.' });
     const token = crypto.randomBytes(12).toString('hex');
-    room.players[freeTeam] = { token, name, socketId: socket.id, order: null, ready: false, connected: true, graceTimer: null };
+    room.players[freeTeam] = { token, name, socketId: socket.id, heroId: null, ready: false, connected: true, graceTimer: null };
     bind(room, freeTeam);
     cb?.({ ok: true, code, token, team: freeTeam });
     broadcastRoom(room);
@@ -185,16 +185,11 @@ io.on('connection', socket => {
     broadcastRoom(room);
   });
 
-  socket.on('order', data => {
+  socket.on('pickHero', data => {
     if (!myRoom || !myTeam) return;
-    const ord = Array.isArray(data?.order) ? data.order.map(Number) : null;
-    const rosterLen = TEAMS[myTeam].roster.length;
-    if (!ord || ord.length !== 3) return;
-    // три РАЗНЫХ индекса в пределах ростера
-    const uniq = new Set(ord);
-    if (uniq.size !== 3) return;
-    if (ord.some(i => !Number.isInteger(i) || i < 0 || i >= rosterLen)) return;
-    myRoom.players[myTeam].order = ord;
+    const heroId = String(data?.heroId || '');
+    if (!CHARACTERS[heroId]) return;
+    myRoom.players[myTeam].heroId = heroId;
     broadcastRoom(myRoom);
   });
 
@@ -227,7 +222,7 @@ io.on('connection', socket => {
   socket.on('ready', () => {
     if (!myRoom || !myTeam) return;
     const pl = myRoom.players[myTeam];
-    if (!pl.order) return;
+    if (!pl.heroId) return;
     pl.ready = true;
     broadcastRoom(myRoom);
     const a = myRoom.players.A, b = myRoom.players.B;
@@ -245,7 +240,7 @@ io.on('connection', socket => {
   socket.on('rematch', () => {
     if (!myRoom || !myTeam) return;
     myRoom.players[myTeam].ready = false;
-    myRoom.players[myTeam].order = null;
+    myRoom.players[myTeam].heroId = null;
     myRoom.players[myTeam].wantsRematch = true;
     const a = myRoom.players.A, b = myRoom.players.B;
     if (a?.wantsRematch && b?.wantsRematch) {

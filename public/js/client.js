@@ -41,12 +41,11 @@ let isHost = false;
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const SKILL_KEYS = { veil: 'fog', rabbit: 'channel', kain: 'field', sectarian: 'cone', duk: 'mark', king: 'royaldash',
   barogun: 'spray', heir: 'aim', reflection: 'godmark', defender: 'parry', chief: 'larva', lucian: 'pseudo', spiger: 'overclock' };
-const TEAMS_LEN = { A: 7, B: 6 };  // длины ростеров фракций (для быстрого рандом-боя)
+const HERO_IDS = Object.keys(META);
 
 // ---------- состояние ----------
 let my = { name: '', team: null, code: null, token: null };
-let pickedTeam = 'A';
-let order = [];
+let pickedHero = null;
 let chars = null, arena = { w: 1200, h: 700 }, youTeam = 'A', names = { A: '', B: '' }, orders = null;
 let inBattle = false;
 let snapPrev = null, snapCur = null, recvPrev = 0, recvCur = 0;
@@ -257,23 +256,13 @@ const inpName = $('inp-name'), inpCode = $('inp-code'), homeErr = $('home-err');
 const saved = loadSession();
 if (saved?.name) inpName.value = saved.name;
 
-document.querySelectorAll('.team-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.team-btn').forEach(x => x.classList.remove('sel'));
-    b.classList.add('sel');
-    pickedTeam = b.dataset.team;
-    syncCreateBtn();
-  });
-});
-document.querySelector('.team-btn[data-team="A"]').classList.add('sel');
-
 function syncCreateBtn() { $('btn-create').disabled = !inpName.value.trim(); }
 inpName.addEventListener('input', syncCreateBtn);
 syncCreateBtn();
 
 $('btn-create').addEventListener('click', () => {
   my.name = inpName.value.trim() || 'Игрок';
-  socket.emit('create', { name: my.name, team: pickedTeam }, res => {
+  socket.emit('create', { name: my.name }, res => {
     if (!res?.ok) { homeErr.textContent = res?.err || 'Не удалось открыть врата.'; return; }
     Object.assign(my, { code: res.code, token: res.token, team: res.team });
     saveSession();
@@ -310,11 +299,10 @@ socket.on('connect', () => {
 // ============================================================
 //  КОМНАТА / ПОРЯДОК
 // ============================================================
-let roomTeams = null;
 function enterRoom() {
   setMusic('theme');
   $('room-code').textContent = my.code || '------';
-  order = [];
+  pickedHero = null;
   $('btn-ready').disabled = true;
   $('btn-ready').textContent = 'К БОЮ';
   $('room-status').textContent = '';
@@ -331,51 +319,56 @@ socket.on('room', data => {
   isHost = data.host === data.yourTeam;
   setMapSel(data.mapId);
   setMapLock();
-  roomTeams = data.teams;
   $('room-code').textContent = data.code;
   const other = data.yourTeam === 'A' ? data.B : data.A;
   const mine = data.yourTeam === 'A' ? data.A : data.B;
   $('room-opponent').textContent = other
-    ? `⚔ ${other.name}${other.connected ? '' : ' (отключён)'} — ${other.ready ? 'готов к бою' : other.orderSet ? 'порядок выбран' : 'выбирает порядок'}`
+    ? `⚔ ${other.name}${other.connected ? '' : ' (отключён)'} — ${other.ready ? 'готов к бою' : other.heroId ? 'герой выбран' : 'выбирает героя'}`
     : 'ожидание второго владыки… отправь ему код';
   if (mine?.ready) $('room-status').textContent = other?.ready ? 'врата открываются…' : 'ждём соперника…';
-  buildOrderCards(data.teams[data.yourTeam].roster);
 });
 
-let builtRoster = '';
-function buildOrderCards(roster) {
-  if (builtRoster === roster.join()) { refreshBadges(roster); return; }
-  builtRoster = roster.join();
+let builtHeroPick = false;
+function buildOrderCards() {
+  if (builtHeroPick) { refreshBadges(); return; }
+  builtHeroPick = true;
   const wrap = $('order-cards');
   wrap.innerHTML = '';
-  roster.forEach((id, i) => {
+  HERO_IDS.forEach(id => {
     const m = META[id];
     const card = document.createElement('div');
     card.className = 'ocard';
-    card.dataset.idx = i;
+    card.dataset.hero = id;
     card.innerHTML = `<div class="oc-num"></div><img src="${m.img}" onerror="this.onerror=null;this.src='${m.fb}'" alt="${m.name}">
       <div class="oc-name">${m.name}</div><div class="oc-arch">${m.arch}</div>
       <div class="oc-stats"><b>${m.line}</b></div>`;
     card.addEventListener('click', () => {
-      const idx = i;
-      if (order.includes(idx)) { order = []; }
-      else { order.push(idx); }
-      refreshBadges(roster);
-      if (order.length === 3) { socket.emit('order', { order }); $('btn-ready').disabled = false; }
-      else $('btn-ready').disabled = true;
+      pickedHero = id;
+      refreshBadges();
+      socket.emit('pickHero', { heroId: pickedHero });
+      $('btn-ready').disabled = false;
     });
     wrap.appendChild(card);
   });
-  refreshBadges(roster);
+  // карта "случайный выбор"
+  const rnd = document.createElement('div');
+  rnd.className = 'ocard ocard-random';
+  rnd.innerHTML = `<div class="oc-rand-sigil">⚄</div><div class="oc-name">Случайный выбор</div><div class="oc-arch">Судьба решает</div>`;
+  rnd.addEventListener('click', () => {
+    pickedHero = HERO_IDS[(Math.random() * HERO_IDS.length) | 0];
+    refreshBadges();
+    socket.emit('pickHero', { heroId: pickedHero });
+    $('btn-ready').disabled = false;
+  });
+  wrap.appendChild(rnd);
+  refreshBadges();
 }
-function refreshBadges(roster) {
+function refreshBadges() {
   document.querySelectorAll('.ocard').forEach(card => {
-    const idx = +card.dataset.idx;
-    const pos = order.indexOf(idx);
-    card.classList.toggle('picked', pos >= 0);
-    card.querySelector('.oc-num').textContent = pos >= 0 ? (pos + 1) : '';
+    card.classList.toggle('picked', card.dataset.hero === pickedHero);
   });
 }
+buildOrderCards();
 $('btn-ready').addEventListener('click', () => {
   socket.emit('ready');
   $('btn-ready').disabled = true;
@@ -383,10 +376,9 @@ $('btn-ready').addEventListener('click', () => {
 });
 
 $('btn-rand-order').addEventListener('click', () => {
-  const rosterLen = (roomTeams && my.team && roomTeams[my.team]?.roster.length) || 3;
-  order = shuffle([...Array(rosterLen).keys()]).slice(0, 3);
+  pickedHero = HERO_IDS[(Math.random() * HERO_IDS.length) | 0];
   refreshBadges();
-  socket.emit('order', { order });
+  socket.emit('pickHero', { heroId: pickedHero });
   $('btn-ready').disabled = false;
 });
 
@@ -421,17 +413,15 @@ socket.on('mapSelected', d => setMapSel(d.mapId));
 // ---------- рандомный бой из меню ----------
 $('btn-random-battle').addEventListener('click', () => {
   my.name = inpName.value.trim() || 'Странник';
-  const team = Math.random() < .5 ? 'A' : 'B';
-  socket.emit('create', { name: my.name, team }, res => {
+  socket.emit('create', { name: my.name }, res => {
     if (!res?.ok) { homeErr.textContent = res?.err || 'Врата не открылись.'; return; }
     Object.assign(my, { code: res.code, token: res.token, team: res.team });
     saveSession();
     enterRoom();
     const ids = Object.keys(MAP_META);
     socket.emit('selectMap', { mapId: ids[(Math.random() * ids.length) | 0] });
-    const rl = (TEAMS_LEN[res.team] || 3);
-    order = shuffle([...Array(rl).keys()]).slice(0, 3);
-    socket.emit('order', { order });
+    pickedHero = HERO_IDS[(Math.random() * HERO_IDS.length) | 0];
+    socket.emit('pickHero', { heroId: pickedHero });
     socket.emit('ready');
     $('btn-ready').disabled = true;
     $('btn-ready').textContent = 'ЖДЁМ…';
