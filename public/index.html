@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HOLLOW MIRACLES — Арена Пустоты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="blackout"></div>
+
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-cross" aria-hidden="true">†</div>
+    <div class="splash-logo">HOLLOW&nbsp;MIRACLES</div>
+    <div class="splash-tag">FAITH&nbsp;·&nbsp;BLOOD&nbsp;·&nbsp;WONDER</div>
+    <div class="splash-bar"><div id="splash-fill"></div></div>
+    <div id="splash-pct" class="splash-pct">пробуждение арены…</div>
+  </div>
+</div>
+
+<button id="btn-mute" class="mute-btn" title="звук">♪</button>
+
+<!-- ЭКРАН: ГЛАВНОЕ МЕНЮ -->
+<section id="screen-home" class="screen active">
+  <div class="menu-veil" aria-hidden="true"></div>
+  <div class="menu-col">
+    <div class="menu-logo">
+      <h1 class="hm-title">HOLLOW<span class="hm-cross">†</span>MIRACLES</h1>
+      <p class="hm-tag">FAITH&nbsp;.&nbsp;BLOOD&nbsp;.&nbsp;WONDER&nbsp;.</p>
+    </div>
+    <nav class="menu-nav">
+      <button id="btn-menu-play" class="menu-plaque primary">ИГРАТЬ</button>
+      <button id="btn-menu-lore" class="menu-plaque">ЛОР</button>
+      <button id="btn-menu-yarik" class="menu-plaque">ЯРИК</button>
+    </nav>
+    <p class="menu-foot">Арена зовёт. Чудеса решают исход.</p>
+  </div>
+</section>
+
+<!-- ЭКРАН: ИГРАТЬ -->
+<section id="screen-play" class="screen">
+  <div class="menu-veil" aria-hidden="true"></div>
+  <div class="menu-col">
+    <h2 class="screen-title">† ИГРАТЬ †</h2>
+    <input id="inp-name" type="text" maxlength="16" placeholder="Твоё имя" autocomplete="off">
+    <div class="home-actions">
+      <div class="panel">
+        <div class="panel-sigil">⚔</div>
+        <h3>Создать лобби</h3>
+        <p class="hint center">Создать новую игру</p>
+        <div class="team-pick">
+          <button class="team-btn" data-team="A">
+            <span class="t-name">Орден Пустоты</span>
+            <span class="t-roster">Вейл · Кролик · Каин</span>
+          </button>
+          <button class="team-btn" data-team="B">
+            <span class="t-name">Культ Бегемота</span>
+            <span class="t-roster">Сектант · Дюк · Король</span>
+          </button>
+        </div>
+        <button id="btn-create" class="cta" disabled>Открыть врата</button>
+      </div>
+      <div class="panel">
+        <div class="panel-sigil">✛</div>
+        <h3>Присоединиться к игре</h3>
+        <p class="hint center">Введи код, который дал хост:</p>
+        <input id="inp-code" type="text" maxlength="6" placeholder="КОД АРЕНЫ" autocomplete="off" style="text-transform:uppercase">
+        <button id="btn-join" class="cta">Войти</button>
+      </div>
+    </div>
+    <button id="btn-random-battle" class="ghost-btn rand-btn">🎲 рандомный бой — судьба решает</button>
+    <p id="home-err" class="err"></p>
+    <button id="btn-play-back" class="back-link">← назад</button>
+  </div>
+</section>
+
+<!-- ЭКРАН: ЛОР -->
+<section id="screen-lore" class="screen">
+  <div class="menu-veil dark" aria-hidden="true"></div>
+  <div class="lore-col">
+    <h2 class="screen-title">† ЛОР МИРА †</h2>
+    <div class="lore-scroll">
+      <p>Мир разделён на два великих предела — земли людей и земли иных существ. Добраться между ними крайне тяжело: путь лежит либо через непроходимые горные кряжи исполинской высоты, либо через монструозный океан с волнами до небес. История мира делится на несколько эпох.</p>
+      <h3>Доисторический период</h3>
+      <p>Время забытых космических богов и первозданных существ, о котором сохранились лишь обрывки преданий. Именно тогда было создано первое и величайшее творение всемогущих сил — Бегемот, исполинское существо, погружённое в вечную спячку. В пробуждённом состоянии оно способно угрожать существованию всего мира; однако даже спящий Бегемот источает древнюю силу, которую при должном знании можно заимствовать — ценой необратимых изменений в природе заимствующего.</p>
+      <h3>Первый магический период</h3>
+      <p>Эпоха расцвета и сосуществования разумных рас. Магия пронизывала весь мир, земные боги ходили среди смертных, а разные народы жили бок о бок, пусть и не всегда мирно.</p>
+      <h3>Второй магический период</h3>
+      <p>Начался с того, что боги покинули земли людей и удалились в великий магический лес. Без их присутствия разгорелись долгие войны рас за мировое господство, завершившиеся разделением мира на человеческий и нечеловеческий пределы с жёстким запретом пересекать границу для обеих сторон. Закончился этот период столетней осадой Крама — столицы величайшей империи в истории человечества. Из кольца окружения прорвались крестианцы — последователи веры в единого бога, основавшие церковь, которая запрещает колдовать без благословения Папы.</p>
+      <h3>Период церкви крестианской веры</h3>
+      <p>Принёс человечеству огромное количество технологических открытий под знаменем новой духовной власти. Однако в конце этой эпохи из забвения поднялась тьма. Последний представитель народа эльфов-хранителей — хранителей тёмных знаний, собиравшихся тысячелетиями — заимствовал силу спящего Бегемота и превратился в нечто, уже не поддающееся описанию ни одной из известных рас.</p>
+      <p>Этот повелитель тьмы объединил вокруг себя 13 королей нелюдских рас — демонов, великанов, звероподобных и других — и объявил войну человечеству. За пятьдесят лет были уничтожены бесчисленные страны и народы. В ответ армия людей — пять тысяч отрядов, ничтожно малая сила в масштабах той войны — двинулась в поход на столицу тёмной империи через единственное место, где ещё жила магия: первозданный магический лес, невероятно опасный и не знающий жалости. Немногие выжившие вышли из него преображёнными — с новыми знаниями и способностями. Этого оказалось достаточно, чтобы сокрушить императора тьмы.</p>
+      <p>Из тринадцати королей часть была уничтожена самим повелителем за попытку путча, часть пала от рук людей в ходе последующих войн; оставшиеся покинули земли людей навсегда.</p>
+      <h3>Третий магический период</h3>
+      <p>Время, в котором история разворачивается сейчас. Границы формально восстановлены, однако реальная власть рассыпалась. В мире повсеместной анархии сталкиваются люди, освоившие магию, крестианская церковь во главе с великим Папой, всевозможные культисты и магические существа, покинувшие лес. Новая эпоха только начинается — и никто не знает, чем она обернётся.</p>
+    </div>
+    <button id="btn-lore-back" class="back-link">← назад</button>
+  </div>
+</section>
+
+<!-- ЭКРАН: ЯРИК -->
+<section id="screen-yarik" class="screen yarik">
+  <div class="yarik-wrap">
+    <img src="assets/ui/yarik.jpg" alt="Ярик" onerror="this.parentElement.classList.add('noimg')">
+    <p class="yarik-cap">ЯРИК · ХРАНИТЕЛЬ АРЕНЫ</p>
+  </div>
+  <button id="btn-yarik-back" class="back-link fixed">← назад</button>
+</section>
+
+<!-- ЭКРАН: КОМНАТА -->
+<section id="screen-room" class="screen">
+  <div class="room-top">
+    <div class="room-code-wrap">
+      <span class="rc-label">код арены</span>
+      <span id="room-code" class="rc-code">------</span>
+      <button id="btn-copy" class="ghost-btn">копировать</button>
+    </div>
+    <div id="room-opponent" class="room-opp">ожидание второго владыки…</div>
+  </div>
+  <h2 class="order-title">Арена</h2>
+  <div id="map-pick" class="map-pick"></div>
+  <p id="map-hint" class="hint center"></p>
+  <h2 class="order-title">Порядок выхода на арену</h2>
+  <p class="hint center">Нажимай на бойцов в том порядке, в котором они выйдут. Ещё раз — сбросить.</p>
+  <div id="order-cards" class="order-cards"></div>
+  <div class="room-bottom">
+    <div class="room-btns">
+      <button id="btn-rand-order" class="ghost-btn">🎲 случайный порядок</button>
+      <button id="btn-ready" class="cta big" disabled>К БОЮ</button>
+    </div>
+    <p id="room-status" class="hint center"></p>
+  </div>
+  <button id="btn-room-back" class="back-link fixed">← покинуть комнату</button>
+</section>
+
+<!-- ЭКРАН: БОЙ -->
+<section id="screen-battle" class="screen battle">
+  <canvas id="game"></canvas>
+  <button id="btn-battle-exit" class="battle-exit">← выйти</button>
+
+  <div id="hud" class="hud">
+    <div class="hud-side" id="hud-A">
+      <img class="hud-portrait" id="hp-img-A" alt="">
+      <div class="hud-bars">
+        <div class="hud-name" id="hud-name-A"></div>
+        <div class="bar hp"><div class="fill" id="hpbar-A"></div><span class="bar-num" id="hpnum-A"></span></div>
+        <div class="bar mana"><div class="fill" id="mnbar-A"></div></div>
+        <div class="pips" id="pips-A"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+    <div class="hud-mid" id="hud-timer"></div>
+    <div class="hud-side right" id="hud-B">
+      <div class="hud-bars">
+        <div class="hud-name" id="hud-name-B"></div>
+        <div class="bar hp"><div class="fill" id="hpbar-B"></div><span class="bar-num" id="hpnum-B"></span></div>
+        <div class="bar mana"><div class="fill" id="mnbar-B"></div></div>
+        <div class="pips right" id="pips-B"><i></i><i></i><i></i></div>
+      </div>
+      <img class="hud-portrait" id="hp-img-B" alt="">
+    </div>
+  </div>
+
+  <div id="skillbar" class="skillbar">
+    <div class="sk" id="sk-atk"><span class="sk-key">J</span><div class="sk-cd"></div><span class="sk-name">удар</span></div>
+    <div class="sk" id="sk-skill"><span class="sk-key">K</span><div class="sk-cd"></div><span class="sk-name" id="sk-skill-name">скилл</span></div>
+    <div class="sk" id="sk-dash"><span class="sk-key">SPACE</span><div class="sk-cd"></div><span class="sk-name">рывок</span></div>
+  </div>
+
+  <div id="touch-ui" class="touch-ui" aria-hidden="true">
+    <div id="joy-zone" class="joy-zone"><div id="joy-base" class="joy-base"><div id="joy-stick" class="joy-stick"></div></div></div>
+    <div class="touch-btns">
+      <button id="tb-dash" class="tbtn small">РЫВОК</button>
+      <button id="tb-skill" class="tbtn mid">СКИЛЛ</button>
+      <button id="tb-atk" class="tbtn big">УДАР</button>
+    </div>
+  </div>
+
+  <div id="banner" class="banner"></div>
+  <div id="pause-overlay" class="pause-overlay"><div class="pause-text" id="pause-text"></div></div>
+
+  <div id="confirm-leave" class="confirm-overlay">
+    <div class="confirm-box">
+      <p>Покинуть бой?<br><span class="hint">Пустота засчитает поражение.</span></p>
+      <div class="confirm-btns">
+        <button id="cl-yes" class="cta">ДА, ПОКИНУТЬ</button>
+        <button id="cl-no" class="ghost-btn">ОСТАТЬСЯ</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ЭКРАН: ИТОГ -->
+<section id="screen-over" class="screen">
+  <div class="over-shade" aria-hidden="true"></div>
+  <h1 id="over-title" class="title small over-title-fallback">ПУСТОТА РЕШИЛА</h1>
+  <div class="over-bottom">
+    <p id="over-sub" class="subtitle"></p>
+    <div class="over-actions">
+      <button id="btn-rematch" class="cta big">ИГРАТЬ СНОВА</button>
+      <button id="btn-exit" class="ghost-btn">вернуться в меню</button>
+    </div>
+    <p id="over-status" class="hint center"></p>
+  </div>
+</section>
+
+<div id="rotate-hint" class="rotate-hint"><span>Поверни телефон горизонтально ⟳</span></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "hollow-miracles",
+  "version": "1.0.0",
+  "description": "HOLLOW MIRACLES — realtime 3v3 dark fantasy duel for two players in browser",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node test/sim.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
+  }
+}
